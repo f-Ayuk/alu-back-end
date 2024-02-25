@@ -9,6 +9,7 @@ if __name__ == "__main__":
     if len(sys.argv) == 2 and sys.argv[1].isdigit():
         # Get the employee ID from the argument
         employee_id = sys.argv[1]
+        employee_name = employee.get('name')
         # Define the base URL for the API
         base_url = "https://jsonplaceholder.typicode.com/"
         # Make a GET request to get the employee name
@@ -28,11 +29,11 @@ if __name__ == "__main__":
                 # Append the task title to the list
                 done_titles.append(task.get("title"))
         # Display the employee name and the task progress
-        print("Employee {} is done with tasks({}/{}):".format(
-            employee.get("name"), done_tasks, total_tasks))
+        print("Employee {} is done with tasks({}/{}): ".format(
+            employee_name, done_tasks, total_tasks))
         # Display the titles of completed tasks with a tabulation and a space
         for title in done_titles:
-            print("\t {}".format(title))
+            print("\t {}".format("title"))
     else:
         # Print an error message if the argument is not valid
         print("Usage: ./0-gather_data_from_an_API.py <employee_id>")
