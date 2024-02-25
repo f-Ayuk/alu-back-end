@@ -1,46 +1,72 @@
 #!/usr/bin/python3
-'''Python script that returns information using REST API'''
-import requests
-import json
-import sys
 
-def getemployee_name(employee_id):
-    """Get the name of employee with given ID."""
-    = requests.getf"https://placeholder.typic.com/users/{employee_id}")
-    if response.statuscode == 20:
-        return response.json()["name"]
-    else:
-        raise Exception(f"Error: Unable to get employee name for employee ID {employee_id}")
+"""
+Using what you did in the task #0,
+extend your Python script to export
+data in the JSON format.
 
-def get_employee_tasks(employee_id):
-    """Get the tasks of the employee with the given ID."""
-    response = requests.get(f"https://jsonplaceholder.typicode.com/todos?userId={employee_id}")
-    if response.status_code == 200:
-        return response.json()
-    else:
-        raise Exception(f"Error: Unable to get tasks for employee ID {employee_id}")
+Requirements:
 
-def export_to_json(employee_id, employee_name, tasks):
-    """Export the employee's tasks to a JSON file."""
-    data = {employee_id: []}
-    for task in tasks:
-        data[employee_id].append({
-            "task": task["title"],
-            "completed": task["completed"],
-            "username": employee_name
-        })
-    with open(f"{employee_id}.json", "w") as jsonfile:
-        json.dump(data, jsonfile, indent=4)
+Records all tasks that are owned by this employee
+
+Format must be:
+{"USER_ID": [{"task": "TASK_TITLE",
+"completed": TASK_COMPLETED_STATUS,
+"username": "USERNAME"},
+{"task": "TASK_TITLE",
+"completed": TASK_COMPLETED_STATUS,
+"username": "USERNAME"}, ... ]}
+File name must be: USER_ID.json
+"""
 
 if __name__ == "__main__":
-    if len(sys.argv) == 2 and sys.argv[1].isdigit():
-        employee_id = sys.argv[1]
-        try:
-            employee_name = get_employee_name(employee_id)
-            tasks = get_employee_tasks(employee_id)
-            export_to_json(employee_id, employee_name, tasks)
-            print(f"Successfully exported data for employee {employee_name} to {employee_id}.json")
-        except Exception as e:
-            print(f"Error: {e}")
-    else:
-        print("Usage: ./0-gather_data_from_an_API.py <employee_id>")
+    import json
+    import requests
+    import sys
+
+    if len(sys.argv) != 2:
+        print("Usage: ./2-export_to_JSON.py <employee_id>")
+        sys.exit(1)
+
+    employee_id = sys.argv[1]
+
+    # Construct the URLs for API requests
+    todo_url = f"https://jsonplaceholder.typicode.com/todos?" \
+               f"userId={employee_id}"
+    user_url = f"https://jsonplaceholder.typicode.com/users/{employee_id}"
+
+    try:
+        # Make API requests to fetch data
+        response_todo = requests.get(todo_url)
+        response_user = requests.get(user_url)
+
+        response_todo.raise_for_status()
+        response_user.raise_for_status()
+
+        todo_data = response_todo.json()
+        user_data = response_user.json()
+
+        # Prepare the JSON filename based on user ID
+        filename = f"{employee_id}.json"
+
+        # Create a dictionary in the required format
+        data_to_export = {employee_id: []}
+
+        # Iterate through the tasks and add them to the dictionary
+        for task in todo_data:
+            data_to_export[employee_id].append({
+                "task": task["title"],
+                "completed": task["completed"],
+                "username": user_data["username"]
+            })
+
+        # Write the data to a JSON file
+        with open(filename, 'w') as jsonfile:
+            json.dump(data_to_export, jsonfile, indent=4)
+
+        print(f"Data exported to {filename}")
+
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred while making a request: {e}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
