@@ -1,8 +1,12 @@
+#!/usr/bin/python3
+'''Python script that returns information using REST API'''
+
 import requests
 import csv
 import sys
 
-def getemployee_name(employee_id):    """Get the name of employee with given ID."""
+def getemployee_name(employee_id):
+    """Get the name of employee with given ID."""
     = requests.getf"https://placeholder.typic.com/users/{employee_id}")
     if response.statuscode == 20:
         return response.json()["name"]
