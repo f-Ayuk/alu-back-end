@@ -1,54 +1,57 @@
 #!/usr/bin/python3
-'''Python script that returns information using REST API'''
 
-import requests
-import csv
-import sys
+"""
+Using what you did in the task #0,
+extend your Python script to export
+data in the CSV format.
 
-def getemployee_name(employee_id):
-    """Get the name of employee with given ID."""
-    = requests.getf"https://placeholder.typic.com/users/{employee_id}")
-    if response.statuscode == 20:
-        return response.json()["name"]
-    else:
-        raise Exception(f"Error: Unable to get employee name for employee ID {employee_id}")
+Requirements:
 
-def get_employee_tasks(employee_id):
-    """Get the tasks of the employee with the given ID."""
-    response = requests.get(f"https://jsonplaceholder.typicode.com/todos?userId={employee_id}")
-    if response.status_code == 200:
-        return response.json()
-    else:
-        raise Exception(f"Error: Unable to get tasks for employee ID {employee_id}")
-
-def get_employee_todo_list_progress(employee_id):
-    """Get the progress of the employee's TODO list."""
-    employee_name = get_employee_name(employee_id)
-    tasks = get_employee_tasks(employee_id)
-    return employee_name, tasks
-
-def export_to_csv(employee_id, employee_name, tasks):
-    """Export the employee's tasks to a CSV file."""
-    with open(f"{employee_id}.csv", "w", newline="") as csvfile:
-        fieldnames = ["USER_ID", "USERNAME", "TASK_COMPLETED_STATUS", "TASK_TITLE"]
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
-        for task in tasks:
-            writer.writerow({
-                "USER_ID": employee_id,
-                "USERNAME": employee_name,
-                "TASK_COMPLETED_STATUS": str(task["completed"]),
-                "TASK_TITLE": task["title"]
-            })
+Records all tasks that are owned by this employee
+Format must be:
+"USER_ID","USERNAME","TASK_COMPLETED_STATUS","TASK_TITLE"
+File name must be: USER_ID.csv
+"""
 
 if __name__ == "__main__":
-    if len(sys.argv) == 2 and sys.argv[1].isdigit():
-        employee_id = sys.argv[1]
-        try:
-            employee_name, tasks = get_employee_todo_list_progress(employee_id)
-            export_to_csv(employee_id, employee_name, tasks)
-            print(f"Successfully exported data for employee {employee_name} to {employee_id}.csv")
-        except Exception as e:
-            print(f"Error: {e}")
-    else:
-        print("Usage: ./0-gather_data_from_an_API.py <employee_id>")
+    import csv
+    import requests
+    import sys
+
+    # Define the base URLs for API requests
+    todo_url = "https://jsonplaceholder.typicode.com/todos"
+    user_url = f"https://jsonplaceholder.typicode.com/users/{sys.argv[1]}"
+
+    # Create a payload with the 'userId' query parameter
+    payload = {"userId": sys.argv[1]}
+
+    # Make API requests to fetch data
+    response_todo = requests.get(todo_url, params=payload)
+    response_user = requests.get(user_url)
+
+    # Convert API responses to JSON format
+    data_todo = response_todo.json()
+    data_user = response_user.json()
+
+    # Define the CSV filename based on user ID
+    filename = f"{sys.argv[1]}.csv"
+
+    # Open the CSV file for writing
+    with open(filename, 'w', newline='') as csvfile:
+        # Create a CSV writer object
+        data_writer = csv.writer(
+            csvfile, delimiter=",", quotechar='"', quoting=csv.QUOTE_ALL
+        )
+
+        data_writer = csv.writer(
+            csvfile, delimiter=",", quotechar='"', quoting=csv.QUOTE_ALL
+        )
+
+        # Iterate through the tasks and write to the CSV file
+        for task in data_todo:
+            data_writer.writerow([
+                task["userId"],
+                data_user["username"],
+                task["completed"],
+                task["title"]
+            ])
